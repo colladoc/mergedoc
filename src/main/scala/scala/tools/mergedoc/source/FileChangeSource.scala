@@ -35,7 +35,7 @@ class FileChangeSource(file: File) extends ChangeSource {
 		def doParse(node: xml.Node): (EntityType.Type, String, String, String) = (
       EntityType.withName((node \ "type").text),
       (node \ "filename").text,
-      (node \ "id").text,
+      (node \ "identifier").text,
       (node \ "newcomment").text
     )
 		(xml.XML.loadFile(file) \\ "item").map(doParse)
