@@ -27,7 +27,7 @@ import scala.util.parsing.combinator.{RegexParsers, JavaTokenParsers}
 class ArgumentParser extends JavaTokenParsers with RegexParsers {
 
   lazy val arguments: Parser[Argument] =
-    phrase(help) | phrase(interactive) | phrase(verbose) | phrase(file) | phrase(path) | phrase(fileList) |
+    phrase(help) | phrase(interactive) | phrase(verbose) | phrase(file) | phrase(path) | phrase(fileList) | phrase(url)
       phrase(toggle) | phrase(preferenceArgument) | phrase(badOption)
 
   lazy val interactive = ("--interactive" | "-i") ^^^ Interactive
@@ -36,7 +36,8 @@ class ArgumentParser extends JavaTokenParsers with RegexParsers {
   lazy val file = ("--file=" | "-f=") ~ ".+".r ^^ { case (_ ~ path) => FileName(path) }
   lazy val path = ("--path=" | "-p=") ~ ".+".r ^^ { case (_ ~ path) => Path(path) }
   lazy val fileList = ("--fileList=" | "-l=") ~ ".+".r ^^ { case (_ ~ name) => FileList(name) }
-  
+  lazy val url = ("--url=" | "-u=") ~ ".+".r ^^ { case (_ ~ path) => Url(path) }
+
   lazy val toggle = plusOrMinus ~ ident ^^ { case onOrOff ~ key => PreferenceArgument(key, onOrOff.toString) }
   lazy val plusOrMinus = "+" ^^^ true | "-" ^^^ false
   lazy val preferenceArgument = "-" ~ ident ~ "=" ~ "\\w+".r ^^ { case (_ ~ key ~ _ ~ value) => PreferenceArgument(key, value) }
@@ -51,6 +52,7 @@ case class PreferenceArgument(preferenceKey: String, value: String) extends Argu
 case class FileName(name: String) extends Argument
 case class FileList(name: String) extends Argument
 case class Path(path: String) extends Argument
+case class Url(uri: String) extends Argument
 
 case object Interactive extends Argument
 case object Verbose extends Argument

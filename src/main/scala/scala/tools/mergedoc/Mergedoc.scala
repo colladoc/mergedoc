@@ -24,7 +24,7 @@ package scala.tools.mergedoc
 
 import java.io.File
 import io.Source
-import source.FileChangeSource
+import source.{ChangeSource, FileChangeSource, UrlChangeSource}
 
 object Mergedoc {
 
@@ -76,8 +76,26 @@ object Mergedoc {
     val interactive = arguments contains Interactive
     val verbose = arguments contains Verbose
 
-    val filename = arguments collect { case FileName(n) => n } head
-    val path = arguments collect { case Path(p) => p } head
+    val filename = arguments collect { case FileName(n) => n } headOption
+    val url = arguments collect { case Url(u) => u } headOption
+
+    val sources = List(
+      filename match {
+        case Some(f) => Some(new FileChangeSource(f))
+        case None => None
+      }, url match {
+        case Some(u) => Some(new UrlChangeSource(u))
+        case None => None
+      }).flatten
+
+    if (sources.isEmpty)
+      errors ::= "File or url list is empty"
+
+    var path: String = "" // TODO: simplify
+    arguments collect { case Path(p) => p } headOption match {
+      case Some(p) => path = p
+      case None => errors ::= "Path is empty"
+    }
 
     if (!errors.isEmpty) {
       errors.reverse foreach System.err.println
@@ -86,9 +104,8 @@ object Mergedoc {
     }
 
     val classpath = "/home/hosekp/Development/collaborative-scaladoc/mergedoc/project/boot/scala-2.8.0/lib/scala-library.jar" // System.getProperties.getProperty("java.class.path")
-
     val settings = new Configuration(classpath, path, 80, interactive, verbose)
-    val processor = new CodeProcessor(settings, new FileChangeSource(new File(filename)))
+    val processor = new CodeProcessor(settings, sources.head)
 		val updater = new CodeUpdater(processor)
     updater.update
     processor.done
@@ -102,6 +119,7 @@ object Mergedoc {
     println("  --interactive, -i               Ask for confirmation on each change.")
     println("  --file=<file>, -f=<file>        File source containing documentation changes.")
     println("  --path=<path>, -p=<path>        Path to sources to which changes should be applied.")
+    println("  --url=<url>,   -u=<url>         Url containing documentation changes.")
     println("  --verbose -v                    Verbose output.")
     println()
   }

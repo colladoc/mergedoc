@@ -24,7 +24,17 @@ package scala.tools.mergedoc
 package source
 
 trait ChangeSource {
+  def changes = parse map { case (tpe, file, id, cmt) => Change(tpe, file, id, cmt) }
 
-  def changes: Iterable[Change]
+  def parse: Seq[(EntityType.Type, String, String, String)] = {
+    def doParse(node: xml.Node): (EntityType.Type, String, String, String) = (
+            EntityType.withName((node \ "type").text),
+            (node \ "filename").text,
+            (node \ "identifier").text,
+            (node \ "newcomment").text
+            )
+    (getItems \\ "item").map(doParse)
+  }
 
+  def getItems: scala.xml.Elem
 }
