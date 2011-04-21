@@ -31,13 +31,13 @@ class FileChangeSource(fileName: String) extends ChangeSource {
   val file = new File(fileName)
   require(file.exists)
 
-  def getItems: Elem = xml.XML.loadFile(file)
+  lazy val getItems: Elem = xml.XML.loadFile(file)
 
   override def toString = file.toURI.toString
 }
 
 class UrlChangeSource(url: String) extends ChangeSource {
-  def getItems: Elem = xml.XML.loadString(Source.fromURL(url).mkString)
+  lazy val getItems: Elem = xml.XML.loadString(Source.fromURL(url).mkString)
 
   override def toString = url
 }
