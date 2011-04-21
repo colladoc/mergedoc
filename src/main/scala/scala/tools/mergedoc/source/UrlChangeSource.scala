@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Petr Hosek. All rights reserved.
+ * Copyright (c) 2011, Sergey Ignatov. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
  * that the following conditions are met:
@@ -20,17 +20,16 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package scala.tools.mergedoc
-package source
+package scala.tools.mergedoc.source
 
-import java.io.File
 import xml.Elem
+import io.Source
 
-class FileChangeSource(fileName: String) extends ChangeSource {
-  val file = new File(fileName)
-  require(file.exists)
+/**
+ * @author ignatov
+ */
+class UrlChangeSource(url: String) extends ChangeSource {
+  lazy val getItems: Elem = xml.XML.loadString(Source.fromURL(url).mkString)
 
-  lazy val getItems: Elem = xml.XML.loadFile(file)
-
-  override def toString = file.toURI.toString
+  override def toString = url
 }
