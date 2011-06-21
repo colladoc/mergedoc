@@ -65,6 +65,8 @@ class CodeProcessor(val config: Configuration, source: ChangeSource) {
   case class Location(filename: String, id: String, offset: Int, length: Int, comment: String, newLine: Boolean)
 
 	def items: Iterable[SymbolResult] = {
+    if (config.verbose)
+      println("Fetching changes from " + source)
 		for (change <- source.changes) yield {
       val id = format(change.id, change.entity)
 			val path = config.path + File.separator + change.filename

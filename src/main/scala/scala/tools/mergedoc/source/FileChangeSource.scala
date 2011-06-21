@@ -24,21 +24,13 @@ package scala.tools.mergedoc
 package source
 
 import java.io.File
+import xml.Elem
 
-class FileChangeSource(file: File) extends ChangeSource {
+class FileChangeSource(fileName: String) extends ChangeSource {
+  val file = new File(fileName)
   require(file.exists)
 
-  def changes =
-    parse(file) map { case (tpe, file, id, cmt) => Change(tpe, file, id, cmt) }
+  lazy val getItems: Elem = xml.XML.loadFile(file)
 
-  def parse(file: File): Seq[(EntityType.Type, String, String, String)] = {
-		def doParse(node: xml.Node): (EntityType.Type, String, String, String) = (
-      EntityType.withName((node \ "type").text),
-      (node \ "filename").text,
-      (node \ "identifier").text,
-      (node \ "newcomment").text
-    )
-		(xml.XML.loadFile(file) \\ "item").map(doParse)
-	}
-
+  override def toString = file.toURI.toString
 }

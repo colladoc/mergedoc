@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Petr Hosek. All rights reserved.
+ * Copyright (c) 2011, Sergey Ignatov. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
  * that the following conditions are met:
@@ -20,21 +20,16 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package scala.tools.mergedoc
-package source
+package scala.tools.mergedoc.source
 
-trait ChangeSource {
-  def changes = parse map { case (tpe, file, id, cmt) => Change(tpe, file, id, cmt) }
+import xml.Elem
+import io.Source
 
-  def parse: Seq[(EntityType.Type, String, String, String)] = {
-    def doParse(node: xml.Node): (EntityType.Type, String, String, String) = (
-            EntityType.withName((node \ "type").text),
-            (node \ "filename").text,
-            (node \ "identifier").text,
-            (node \ "newcomment").text
-            )
-    (getItems \\ "item").map(doParse)
-  }
+/**
+ * @author ignatov
+ */
+class UrlChangeSource(url: String) extends ChangeSource {
+  lazy val getItems: Elem = xml.XML.loadString(Source.fromURL(url).mkString)
 
-  def getItems: scala.xml.Elem
+  override def toString = url
 }
