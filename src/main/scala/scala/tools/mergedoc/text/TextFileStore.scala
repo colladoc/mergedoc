@@ -36,7 +36,7 @@ class TextFileStore(var text: String) {
       case head :: tail =>
         val delta = text.length - len
         tail.foreach(r => r.off += delta)
-        Edit(text, len, off + shift) :: tail
+        Edit(text, len, off + shift) :: head :: tail
       case Nil =>
         Edit(text, len, off) :: Nil
     }
